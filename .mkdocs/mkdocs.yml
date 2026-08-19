@@ -3,10 +3,10 @@ site_url: https://dcherry88.github.io/mkdoc-test/
 repo_url: https://github.com/dcherry88/mkdoc-test
 repo_name: dcherry88/mkdoc-test
 
-# This config lives in .mkdocs/ (a dot-folder, auto-excluded from the doc
-# walk) so docs_dir can point at the vault root itself with nothing moved
-# out of its Obsidian folder structure to be published.
-docs_dir: ..
+# Content now lives in the separate GitHub wiki repo
+# (dcherry88/mkdoc-test.wiki), checked out into ./wiki at build time.
+# This repo only holds the mkdocs tooling.
+docs_dir: ../wiki
 site_dir: ../../site
 use_directory_urls: true
 

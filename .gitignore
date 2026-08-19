@@ -1,6 +1,7 @@
 /.venv/
 /site/
 /_site/
+/wiki/
 __pycache__/
 .DS_Store
 .obsidian/

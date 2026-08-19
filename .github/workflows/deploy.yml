@@ -3,6 +3,7 @@ name: Deploy mkdocs site to GitHub Pages
 on:
   push:
     branches: [master]
+  gollum: # fires on wiki page create/update
   workflow_dispatch:
 
 permissions:
@@ -20,6 +21,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Content lives in the wiki repo, not this one.
+      - name: Checkout wiki content
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -27,8 +35,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r .mkdocs/requirements.txt
 
-      # mkdocs forbids site_dir living inside docs_dir, and docs_dir here
-      # is the repo root, so build to an explicit path outside the checkout.
+      # mkdocs forbids site_dir living inside docs_dir, so build to an
+      # explicit path outside both checkouts.
       - name: Build site
         run: mkdocs build -f .mkdocs/mkdocs.yml --strict --site-dir /tmp/site
 
