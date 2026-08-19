@@ -1,0 +1,47 @@
+site_name: Obsidian Test Vault
+site_url: https://dcherry88.github.io/mkdoc-test/
+repo_url: https://github.com/dcherry88/mkdoc-test
+repo_name: dcherry88/mkdoc-test
+
+# This config lives in .mkdocs/ (a dot-folder, auto-excluded from the doc
+# walk) so docs_dir can point at the vault root itself with nothing moved
+# out of its Obsidian folder structure to be published.
+docs_dir: ..
+site_dir: ../../site
+use_directory_urls: true
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - awesome-pages
+  - roamlinks
+  - redirects:
+      redirect_maps:
+        index.md: Home.md
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences
