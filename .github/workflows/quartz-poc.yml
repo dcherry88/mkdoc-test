@@ -37,6 +37,10 @@ jobs:
           rm -rf .quartz/content
           mkdir -p .quartz/content
           rsync -a --exclude='.git' --exclude='.obsidian' --exclude='.gitignore' --exclude='.gitattributes' wiki/ .quartz/content/
+          # Quartz's home page must be content/index.md; the vault's home
+          # note is Home.md, so mirror it at build time without touching
+          # the actual wiki content.
+          cp .quartz/content/Home.md .quartz/content/index.md
 
       - uses: actions/setup-node@v4
         with:
