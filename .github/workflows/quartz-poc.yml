@@ -1,0 +1,41 @@
+name: Quartz POC build (branch-only, no deploy)
+
+# This is a side-by-side comparison POC against the same wiki content
+# used by the live mkdocs build on master. It intentionally has no
+# deploy job so it can't overwrite the live Pages site.
+
+on:
+  push:
+    branches: [quartz-poc]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Content lives in the wiki repo, same source the mkdocs build uses.
+      - name: Checkout wiki content
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Copy wiki content into Quartz content dir
+        run: |
+          rm -rf .quartz/content
+          mkdir -p .quartz/content
+          rsync -a --exclude='.git' --exclude='.obsidian' --exclude='.gitignore' --exclude='.gitattributes' wiki/ .quartz/content/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        working-directory: .quartz
+        run: npm ci
+
+      - name: Build site
+        working-directory: .quartz
+        run: node quartz/bootstrap-cli.mjs build
