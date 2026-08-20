@@ -1,0 +1,73 @@
+name: Quartz POC (wiki-triggered)
+
+# GitHub only evaluates gollum-triggered workflows using the copy of the
+# workflow file that lives on the default branch (master) — the
+# quartz-poc branch's own copy of this workflow is never consulted for
+# that event. This file exists here purely so wiki pushes can trigger a
+# Quartz build; it checks out the actual Quartz tooling from the
+# quartz-poc branch explicitly rather than duplicating it here.
+
+on:
+  gollum: # fires on wiki page create/update
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Quartz POC tooling
+        uses: actions/checkout@v4
+        with:
+          ref: quartz-poc
+
+      # Content lives in the wiki repo, same source the mkdocs build uses.
+      - name: Checkout wiki content
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Copy wiki content into Quartz content dir
+        run: |
+          rm -rf .quartz/content
+          mkdir -p .quartz/content
+          rsync -a --exclude='.git' --exclude='.obsidian' --exclude='.gitignore' --exclude='.gitattributes' wiki/ .quartz/content/
+          # Quartz's home page must be content/index.md; the vault's home
+          # note is Home.md, so mirror it at build time without touching
+          # the actual wiki content.
+          cp .quartz/content/Home.md .quartz/content/index.md
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        working-directory: .quartz
+        run: npm ci
+
+      - name: Build site
+        working-directory: .quartz
+        run: node quartz/bootstrap-cli.mjs build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .quartz/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
