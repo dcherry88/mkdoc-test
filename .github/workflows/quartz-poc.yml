@@ -1,13 +1,23 @@
-name: Quartz POC build (branch-only, no deploy)
+name: Quartz POC build and deploy
 
-# This is a side-by-side comparison POC against the same wiki content
-# used by the live mkdocs build on master. It intentionally has no
-# deploy job so it can't overwrite the live Pages site.
+# Side-by-side comparison POC against the same wiki content used by the
+# mkdocs build on master. Deploys to the SAME Pages site, so while this
+# is live it temporarily replaces the mkdocs-built output until master
+# (or another branch allowed to deploy) runs again.
 
 on:
   push:
     branches: [quartz-poc]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -39,3 +49,17 @@ jobs:
       - name: Build site
         working-directory: .quartz
         run: node quartz/bootstrap-cli.mjs build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .quartz/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
