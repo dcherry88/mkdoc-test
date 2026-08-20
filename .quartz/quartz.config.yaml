@@ -7,7 +7,7 @@ configuration:
   analytics:
     provider: null
   locale: en-US
-  baseUrl: dcherry88.github.io/mkdoc-test-quartz-poc
+  baseUrl: dcherry88.github.io/mkdoc-test
   ignorePatterns:
     - private
     - templates
